@@ -5,7 +5,7 @@ from io import BytesIO
 model_size = "medium"
 model = WhisperModel(model_size, device="auto")
 
-files_dir = "whisper/files/"
+#files_dir = "whisper/files/"
 def transcription(bio: BytesIO):
 
     bio.seek(0)
