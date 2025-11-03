@@ -1,5 +1,3 @@
 aiogram
-dotenv
-os
-io
-faster_whisper
+python-dotenv
+faster-whisper

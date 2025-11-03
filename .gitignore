@@ -25,4 +25,4 @@ build/
 # temp / logs / downloads / model caches
 *.log
 /tmp/
-whisper/files/
+whisper/files/.env
