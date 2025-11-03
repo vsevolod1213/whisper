@@ -7,8 +7,8 @@ from aiogram.types import Message
 import os
 from dotenv import load_dotenv
 from aiogram.handlers import MessageHandler
-from transcription import transcription
-#from pathlib import Path
+from transcription import transcription, which_file
+from pathlib import Path
 from io import BytesIO
 
 load_dotenv()
@@ -17,7 +17,8 @@ TOKEN = os.getenv("api_token")
 bot = Bot(token=TOKEN, default_bot_properties=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp= Dispatcher()
 
-#files_dir = Path("whisper/files")
+max_memory = 20
+files_dir = Path("whisper/files")
 
 @dp.message(CommandStart())
 async def send_welcome(message: Message):
@@ -25,24 +26,52 @@ async def send_welcome(message: Message):
         "Привет! Отправь мне аудиофайл, и я его расшифрую."
     )
 
-@dp.message(F.document | F.audio | F.voice)
+@dp.message(F.document | F.audio | F.voice | F.video | F.video_note)
 class TranscribeHandler(MessageHandler):
     async def handle(self):
         message = self.event
-        await message.answer("Получил файл, начинаю расшифровку... (это может занять время)")
+  
+        file_obj = message.document or message.audio or message.voice or message.video or message.video_note
         
-        file_obj = message.document or message.audio or message.voice
-        if not file_obj:
+        if file_obj == message.video or message.video_note:
+            await message.answer("Получил видео, делаю транскрипцию...")
+
+        elif file_obj == message.document or message.audio or message.voice:
+            await message.answer("Получил аудио, начинаю расшифровку...")
+            
+        else:
             await message.answer("Не удалось получить файл. Попробуйте еще раз.")
             return
         
+        await self.go_to_transcription(message, file_obj)
+        
+    async def go_to_transcription(self, message: Message, file_obj):
         bio = BytesIO()
-        await bot.download(file_obj, destination=bio)
+        file_size_mb = (file_obj.file_size or 0)/1024/1024
 
-        text = await asyncio.to_thread(transcription, bio)
-
-        await message.answer(f"{text}")
-
+        if file_size_mb <= max_memory:
+            file_id = getattr(file_obj, "file_id", None)
+            if not file_id:
+                await message.answer("Не удалось получить идентификатор файла. Попробуйте еще раз.")
+                return
+            await bot.download(file_obj, destination=bio)
+            bio.seek(0)
+            source = bio
+        else:
+            original_name = getattr(file_obj, "file_name", None)
+            ext = Path(original_name).suffix if original_name else ".bin"
+            temp_path = files_dir / f"{file_obj.file_unique_id}{ext}"
+            await bot.download(file_obj, destination=temp_path)
+            source = temp_path
+        
+        try:
+            text = await asyncio.to_thread(which_file, source, media_type=message.content_type)
+            await message.answer(f"<blockquote>{text}</blockquote>",parse_mode="HTML")
+        except Exception as e:
+             await message.answer(f"Ничего не услышал")
+        finally:
+            if isinstance(source, str) and Path(source).exists():
+                Path(source).unlink()
 
 async def main():
     me = await bot.get_me()
