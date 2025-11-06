@@ -7,7 +7,7 @@ from aiogram.types import Message
 import os
 from dotenv import load_dotenv
 from aiogram.handlers import MessageHandler
-from transcription import transcription, which_file
+from backend.transcription import transcription, which_file
 from pathlib import Path
 from io import BytesIO
 
