@@ -1,14 +1,28 @@
 {
   "name": "Filety",
   "short_name": "Filety",
-  "theme_color": "#111827",
-  "background_color": "#111827",
+  "start_url": "/",
   "display": "standalone",
+  "theme_color": "#9333ea",
+  "background_color": "#f8fafc",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "/icon1.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon0.svg",
       "sizes": "any",
-      "type": "image/x-icon"
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }

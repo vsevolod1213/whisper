@@ -67,6 +67,23 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [mode]);
 
+  // sync favicon + theme-color meta
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const favicon = document.getElementById("site-favicon") as HTMLLinkElement | null;
+    const themeMeta = document.getElementById("theme-color") as HTMLMetaElement | null;
+    const isDark = resolved === "dark";
+
+    if (favicon) {
+      favicon.href = isDark ? "/icon0.svg" : "/icon1.png";
+      favicon.type = isDark ? "image/svg+xml" : "image/png";
+    }
+
+    if (themeMeta) {
+      themeMeta.content = isDark ? "#0f172a" : "#f8fafc";
+    }
+  }, [resolved]);
+
   const value = useMemo(
     () => ({
       mode,

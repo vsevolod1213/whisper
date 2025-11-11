@@ -20,7 +20,7 @@ export default function FileUploader() {
         <span className="text-xs uppercase tracking-[0.3em] text-slate-400">добавим загрузчик</span>
       </label>
 
-      <input id={inputId} type="file" accept="audio/*,video/*" className="sr-only" disabled />
+      <input id={inputId} type="file" accept="audio/*,video/*" className="sr-only"/>
     </div>
   );
 }
