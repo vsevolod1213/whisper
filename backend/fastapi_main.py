@@ -6,7 +6,7 @@ from backend.transcription import which_file
 app = FastAPI(title="Failety API")
 app.add_middleware(
     CORSMiddleware,
-    #allow_origins=["https://filety.ru", "http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["https://filety.ru", "http://localhost:3000", "http://127.0.0.1:3000", "https://filety-core.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
