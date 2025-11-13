@@ -81,14 +81,17 @@ export default function TranscribePage() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-4">
-                <a href="#upload" className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-slate-900 transition hover:-translate-y-0.5">
-                  Загрузить файл
-                </a>
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 text-base font-semibold text-white hover:-translate-y-0.5"
+                  className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5"
                 >
-                  Тарифы
+                  Посмотреть тарифы
+                </Link>
+                <Link
+                  href="/convert"
+                  className="inline-flex items-center justify-center rounded-full bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5"
+                >
+                  Конвертация
                 </Link>
               </div>
             </div>
