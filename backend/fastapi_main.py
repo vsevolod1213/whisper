@@ -59,8 +59,11 @@ async def translate_file(file: UploadFile = File(...)):
 
         source = temp_path
 
+    cleanup_files = []
+
     try:
-        text = await asyncio.to_thread(which_file, source, media_type=media)
+        text, clean = await asyncio.to_thread(which_file, source, media_type=media)
+        cleanup_files.extend(clean)
         return {"transcription": text}
 
     except Exception as e:
@@ -70,5 +73,12 @@ async def translate_file(file: UploadFile = File(...)):
         if temp_path and os.path.exists(temp_path):
             try:
                 os.remove(temp_path)
+            except:
+                pass
+
+        for f in cleanup_files:
+            try:
+                if os.path.exists(f):
+                    os.remove(f)
             except:
                 pass
