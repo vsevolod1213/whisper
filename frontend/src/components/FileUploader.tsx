@@ -21,7 +21,7 @@ export async function uploadToServer(file: File) {
     response = await fetch("https://api.filety.online/translate", {
       method: "POST",
       body: formData,
-      signal: controller.signal,
+      //signal: controller.signal,
     });
   } finally {
     clearTimeout(timeout);
