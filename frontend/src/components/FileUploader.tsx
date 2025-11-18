@@ -39,7 +39,7 @@ export async function uploadToServer(file: File) {
     }
 
     while (true) {
-      await delay(1500);
+      await delay(3500);
       const statusResponse = await fetch(`${API_BASE}/translate/status?task_id=${taskId}`);
       if (!statusResponse.ok) {
         const message = await statusResponse.text();
