@@ -24,8 +24,7 @@ export async function uploadToServer(file: File) {
     const startResponse = await fetch(`${API_BASE}/translate/start`, {
       method: "POST",
       body: formData,
-      signal: controller.signal,
-      duplex: "half",
+      signal: controller.signal
     });
 
     if (!startResponse.ok) {
