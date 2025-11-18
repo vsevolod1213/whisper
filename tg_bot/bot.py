@@ -39,6 +39,8 @@ def split_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
             break
         split_index = text.rfind('\n', 0, chunk_size)
         if split_index == -1:
+            split_index = text.rfind(' ', 0, chunk_size)
+        if split_index == -1:
             split_index = chunk_size
         chunks.append(text[:split_index])
         text = text[split_index:].lstrip()
@@ -140,7 +142,7 @@ class TranscribeHandler(MessageHandler):
 
             for part in parts[1:]:
                 await message.answer(f"{WRAP_PREFIX}{part}{WRAP_SUFFIX}", parse_mode="HTML")
-                
+
             for f in cleanup:
                 try:
                     if os.path.exists(f):
