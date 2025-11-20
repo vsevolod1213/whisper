@@ -20,5 +20,5 @@ class Settings:
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
         )
 @lru_cache()
-def get_settings(self) -> Settings:
+def get_settings() -> Settings:
     return Settings()
