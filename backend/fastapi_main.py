@@ -7,7 +7,9 @@ import os
 import tempfile
 import uuid
 from pathlib import Path
-
+from backend.api.v1.health import router as health_db
+from backend.db.session import engine
+from backend.db.base import Base
 
 MB = 1024 * 1024
 MAX_SIZE_IN_MEMORY = 5 * MB
@@ -179,3 +181,8 @@ async def translate_status(task_id: str):
     if status == "error":
         return {"status": "error", "error": task["error"] or "Unknown error"}
     return {"status": status}
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
+app.include_router(health_db)
