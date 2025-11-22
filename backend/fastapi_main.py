@@ -11,6 +11,7 @@ from pathlib import Path
 from backend.api.v1.health import router as health_db
 from backend.db.session import engine
 from backend.db.base import Base
+from backend.api.v1.auth_anonymous import router as auth_anonymous_router
 
 MB = 1024 * 1024
 MAX_SIZE_IN_MEMORY = 5 * MB
@@ -187,3 +188,4 @@ async def translate_status(task_id: str):
 def on_startup():
     Base.metadata.create_all(bind=engine)
 app.include_router(health_db)
+app.include_router(auth_anonymous_router)
