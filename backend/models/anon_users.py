@@ -2,7 +2,7 @@
 from sqlalchemy import DateTime, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
+import uuid as uuid_module
 from datetime import datetime
 from typing import List, TYPE_CHECKING
 from backend.db.session import Base
@@ -15,12 +15,12 @@ class AnonUser(Base):
     id: Mapped[int] = mapped_column(
         primary_key=True
         )
-    uuid: Mapped[uuid.UUID] = mapped_column(
+    uuid: Mapped[uuid_module.UUID] = mapped_column(
         UUID(as_uuid = True), 
         unique=True, 
         index=True, 
         nullable=False, 
-        default=uuid.uuid4
+        default=uuid_module.uuid4
         )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
