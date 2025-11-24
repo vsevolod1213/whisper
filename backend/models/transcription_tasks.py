@@ -31,7 +31,7 @@ class TranscriptionTask(Base):
         index=True
         )
     anon_user_id: Mapped[int|None] = mapped_column(
-        ForeignKey("anon_users.id"), 
+        ForeignKey("anon_users.id", ondelete="CASCADE"), 
         nullable=True,
         index=True
         )

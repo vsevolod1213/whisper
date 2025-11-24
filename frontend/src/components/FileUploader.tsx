@@ -1,3 +1,4 @@
+// frontend/src/components/FileUploader.tsx
 import { useId, useRef, useState } from "react";
 import { useAnonUser } from "@/context/AnonUserContext";
 import { API_BASE_URL } from "@/lib/api";
@@ -19,6 +20,12 @@ export async function uploadToServer(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
+  if (typeof window !== "undefined") {
+    const anonUuid = window.localStorage.getItem("filety_uuid");
+    if (anonUuid) {
+      formData.append("anon_uuid", anonUuid);
+    }
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3 * 60 * 1000);
 

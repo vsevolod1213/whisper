@@ -1,3 +1,4 @@
+# backend/transcription.py
 from faster_whisper import WhisperModel
 from io import BytesIO
 import subprocess
