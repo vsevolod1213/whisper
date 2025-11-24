@@ -17,7 +17,9 @@ from backend.models.anon_users import AnonUser
 import math
 from uuid import UUID as UUID_cls
 from backend.schemas.anon_user import DAILY_LIMIT_ANON_USER
-from sqlalchemy import select
+from sqlalchemy import select, delete
+from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
 
 MB = 1024 * 1024
 
@@ -57,65 +59,6 @@ def _safe_remove(path: str | None):
             os.remove(path)
     except OSError:
         pass
-
-
-"""@app.post("/translate")
-async def translate_file(file: UploadFile = File(...)):
-    media = file.content_type or ""
-
-    temp_path = None
-    total_size = 0
-    buffer = None
-
-    first_chunk = await file.read(1 * MB)
-    total_size += len(first_chunk)
-
-    if total_size <= MAX_SIZE_IN_MEMORY:
-        content = first_chunk + await file.read()
-        buffer = BytesIO(content)
-        buffer.seek(0)
-        source = buffer
-    else:
-        suffix = os.path.splitext(file.filename or "")[1] or ".tmp"
-        fd, temp_path = tempfile.mkstemp(suffix=suffix)
-        os.close(fd)
-
-        with open(temp_path, "wb") as f:
-            f.write(first_chunk)
-
-            while True:
-                chunk = await file.read(2 * MB)
-                if not chunk:
-                    break
-                total_size += len(chunk)
-                f.write(chunk)
-
-        source = temp_path
-
-    cleanup_files = []
-
-    try:
-        text, clean = await asyncio.to_thread(which_file, source, media_type=media)
-        cleanup_files.extend(clean)
-        return {"transcription": text}
-
-    except TranscriptionError as exc:
-        cleanup_files.extend(exc.cleanup)
-        return {
-            "error": "Transcription failed",
-            "details": str(exc),
-        }
-
-    except Exception as e:
-        return {
-            "error": "Transcription failed",
-            "details": f"Unhandled: {e.__class__.__name__}: {e}",
-        }
-
-    finally:
-        _safe_remove(temp_path)
-        for f in cleanup_files:
-            _safe_remove(f) """
 
 
 async def _save_upload_to_temp(file: UploadFile, task_id: str) -> str:
@@ -326,8 +269,49 @@ async def translate_status(task_id: str):
         return {"status": "error", "error": task["error"] or "Unknown error"}
     return {"status": status}
 
+
+ANON_TTL_SECONDS = 24 * 3600
+ANON_CLEANUP_INTERVAL = 1 * 3600
+
+def _cleanup_anon_users(db: Session)->int:
+    cutoff = datetime.utcnow() - timedelta(seconds=ANON_TTL_SECONDS)
+    expired_anon_ids =(
+        db.execute(
+            select(AnonUser.id).where(AnonUser.created_at < cutoff)
+        )
+        .scalars()
+        .all()
+    )
+    if not expired_anon_ids:
+        return 0
+    db.execute(
+        delete(AnonUser).where(AnonUser.id.in_(expired_anon_ids))
+    )
+    db.commit()
+    return len(expired_anon_ids)
+
+async def _anon_cleanup_loop():
+    while True:
+        try:
+            db = SessionLocal()
+            deleted = _cleanup_anon_users(db)
+            if deleted:
+                print(f"[cleanup] Deleted {deleted} expired anon users")
+        except Exception as exc:
+            print(f"[cleanup] Error during anon cleanup: {exc}")
+        finally:
+            try:
+                db.close()
+            except Exception:
+                pass
+        await asyncio.sleep(ANON_CLEANUP_INTERVAL)
+
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
 app.include_router(health_db)
 app.include_router(auth_anonymous_router)
+
+@app.on_event("startup")
+async def startup_cleanup_task():
+    asyncio.create_task(_anon_cleanup_loop())
