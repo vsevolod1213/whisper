@@ -30,20 +30,6 @@ TASKS: dict[str, dict] = {}
 
 app = FastAPI(title="Failety API")
 
-CORS_ORIGINS = [
-    "https://filety.ru",
-    "https://www.filety.ru",
-    "https://filety-core.vercel.app",
-    "http://localhost:3000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-)
 
 @app.get("/health")
 async def health_check():
