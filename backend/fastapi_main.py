@@ -38,13 +38,20 @@ ALLOWED_ORIGINS = [
 
 app = FastAPI(title="Failety API")
 
+origins = [
+    "https://filety.ru",
+    "https://filety-core.vercel.app",
+    "https://filety-core-git-main-vsevolods-projects-6f04d0e3.vercel.app",
+    "https://filety.online",
+    "https://www.filety.ru",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    max_age=86400,
 )
 
 @app.get("/health")
