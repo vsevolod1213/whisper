@@ -28,29 +28,20 @@ TASKS_DIR = Path("/root/filety/backend/tasks")
 TASKS_DIR.mkdir(parents=True, exist_ok=True)
 TASKS: dict[str, dict] = {}
 
-ALLOWED_ORIGINS = [
-    "https://filety-core.vercel.app",
-    "https://filety.vercel.app",
-    "https://filety.ru",
-    "https://filety.online",
-]
-
-
 app = FastAPI(title="Failety API")
 
-origins = [
+CORS_ORIGINS = [
     "https://filety.ru",
-    "https://filety-core.vercel.app",
-    "https://filety-core-git-main-vsevolods-projects-6f04d0e3.vercel.app",
-    "https://filety.online",
     "https://www.filety.ru",
+    "https://filety-core.vercel.app",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -324,4 +315,3 @@ app.include_router(auth_users_router)
 @app.on_event("startup")
 async def startup_cleanup_task():
     asyncio.create_task(_anon_cleanup_loop())
-
