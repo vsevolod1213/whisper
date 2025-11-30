@@ -8,8 +8,15 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/router";
-import { ApiError, authClient, type User } from "@/lib/authClient";
-import { getAccessToken } from "@/lib/http";
+import {
+  ApiError,
+  fetchCurrentUser as fetchCurrentUserApi,
+  loginUser,
+  logoutAllSessions,
+  logoutUser,
+  registerUser,
+  type User,
+} from "@/lib/auth";
 
 type AuthContextValue = {
   user: User | null;
@@ -36,28 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   const fetchCurrentUser = useCallback(async () => {
-    const current = await authClient.getCurrentUser();
+    const current = await fetchCurrentUserApi();
     setUser(current);
     return current;
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
     let active = true;
 
-    const hydrate = async () => {
-      const token = getAccessToken();
-      if (!token) {
-        if (active) {
-          setLoading(false);
-        }
-        return;
-      }
-
-      setLoading(true);
+    const run = async () => {
       try {
         await fetchCurrentUser();
       } catch (error) {
@@ -75,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    void hydrate();
+    void run();
 
     return () => {
       active = false;
@@ -84,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      await authClient.login(email, password);
+      await loginUser(email, password);
       return fetchCurrentUser();
     },
     [fetchCurrentUser],
@@ -92,15 +86,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (email: string, password: string) => {
-      await authClient.register(email, password);
-      await authClient.login(email, password);
+      await registerUser(email, password);
+      await loginUser(email, password);
       return fetchCurrentUser();
     },
     [fetchCurrentUser],
   );
 
   const logout = useCallback(async () => {
-    await authClient.logout();
+    await logoutUser();
     setUser(null);
     if (!router.pathname.startsWith("/auth")) {
       void router.push("/auth/login");
@@ -108,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   const logoutAll = useCallback(async () => {
-    await authClient.logoutAll();
+    await logoutAllSessions();
     setUser(null);
     if (!router.pathname.startsWith("/auth")) {
       void router.push("/auth/login");

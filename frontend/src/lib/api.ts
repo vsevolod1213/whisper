@@ -1,10 +1,6 @@
 // frontend/src/lib/api.ts
 
-const DEFAULT_BASE_URL = process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://filety.ru";
-
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim()
-  ? process.env.NEXT_PUBLIC_API_BASE_URL
-  : DEFAULT_BASE_URL;
+export const API_BASE_URL = "https://api.filety.online";
 
 type ApiErrorPayload = {
   detail?: unknown;
@@ -75,9 +71,10 @@ const mapAnonUser = (data: AnonUserResponse): AnonUserState => ({
   dailyLimitTime: data.daily_limit_time,
 });
 
-const performAnonymousRequest = async (path: string, existingUuid?: string | null) => {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+const performAnonymousRequest = async (existingUuid?: string | null) => {
+  const response = await fetch(`${API_BASE_URL}/auth/anonymous`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ uuid: existingUuid?.trim() ? existingUuid : null }),
   });
@@ -92,17 +89,9 @@ const performAnonymousRequest = async (path: string, existingUuid?: string | nul
 };
 
 export async function authAnonymous(existingUuid?: string | null): Promise<AnonUserState> {
-  const endpoints = ["/auth/anonymous/start", "/auth/anonymous"];
-  let lastError: Error | null = null;
-
-  for (const path of endpoints) {
-    try {
-      return await performAnonymousRequest(path, existingUuid);
-    } catch (error) {
-      lastError =
-        error instanceof Error ? error : new Error("Не удалось получить данные анонимного пользователя");
-    }
+  try {
+    return await performAnonymousRequest(existingUuid);
+  } catch (error) {
+    throw error instanceof Error ? error : new Error("Не удалось получить данные анонимного пользователя");
   }
-
-  throw lastError ?? new Error("Не удалось получить данные анонимного пользователя");
 }

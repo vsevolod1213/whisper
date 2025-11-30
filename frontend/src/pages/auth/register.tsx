@@ -3,7 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
-import { ApiError } from "@/lib/authClient";
+import { ApiError } from "@/lib/auth";
 
 export default function RegisterPage() {
   const title = "Регистрация Filety";
