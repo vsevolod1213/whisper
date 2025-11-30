@@ -1,6 +1,6 @@
 // frontend/src/lib/api.ts
 
-export const API_BASE_URL = "https://api.filety.online";
+export const API_BASE_URL = "https://api.filety.ru";
 
 type ApiErrorPayload = {
   detail?: unknown;
