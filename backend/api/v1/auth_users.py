@@ -57,7 +57,7 @@ def get_current_user(
 
 @router.post("/register", response_model = UserOut, status_code = 201)
 @limiter.limit("3/minute")
-def register(data: UserCreate, db: Session = Depends(get_db)):
+def register(request: Request, data: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
         raise HTTPException(status_code = 400, detail="Email already registered")
