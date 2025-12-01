@@ -21,7 +21,6 @@ export default function Header() {
   const [headerHeight, setHeaderHeight] = useState(0);
   const [hideHeader, setHideHeader] = useState(false);
   const lastScrollY = useRef(0);
-  const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const isAuthenticated = Boolean(user);
 
   const activeIndex = useMemo(
@@ -76,23 +75,25 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (!isAccountMenuOpen) {
+    if (!isMenuOpen && !isAccountMenuOpen) {
       return;
     }
     const handleClickOutside = (event: MouseEvent) => {
-      if (!accountMenuRef.current) {
+      if (!headerRef.current) {
         return;
       }
-      if (!accountMenuRef.current.contains(event.target as Node)) {
+      if (!headerRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
         setIsAccountMenuOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isAccountMenuOpen]);
+  }, [isMenuOpen, isAccountMenuOpen]);
 
   const handleAccountAction = () => {
+    setIsMenuOpen(false);
     if (isAuthenticated) {
       setIsAccountMenuOpen(false);
       if (pathname !== "/account") {
@@ -206,7 +207,7 @@ export default function Header() {
             </div>
           )}
 
-          <div className="relative sm:hidden" ref={accountMenuRef}>
+          <div className="sm:hidden">
             <button
               type="button"
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
@@ -226,43 +227,6 @@ export default function Header() {
                 <path d="M4 20.25c0-3.314 3.134-6 7-6s7 2.686 7 6" strokeLinecap="round" />
               </svg>
             </button>
-            {!loading && isAccountMenuOpen && (
-              <div
-                className="absolute right-0 z-40 mt-3 w-56 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
-              >
-                {isAuthenticated ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsAccountMenuOpen(false);
-                      if (pathname !== "/account") {
-                        void router.push("/account");
-                      }
-                    }}
-                    className="w-full rounded-xl px-3 py-2 text-left transition hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    Перейти в кабинет
-                  </button>
-                ) : (
-                  <>
-                    <Link
-                      href="/auth/login"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
-                      Войти
-                    </Link>
-                    <Link
-                      href="/auth/register"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="mt-1 block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
-                      Регистрация
-                    </Link>
-                  </>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -290,6 +254,37 @@ export default function Header() {
                 {label}
               </Link>
             ))}
+          </div>
+        </div>
+      )}
+
+      {!loading && !isAuthenticated && isAccountMenuOpen && (
+        <div className="sm:hidden">
+          <div
+            className="fixed inset-x-0 z-20 bg-slate-900/40 backdrop-blur-sm"
+            style={{ top: headerHeight }}
+            onClick={() => setIsAccountMenuOpen(false)}
+            aria-hidden
+          />
+          <div
+            className="fixed z-30 w-64 rounded-3xl border border-slate-200 bg-white/95 p-5 text-slate-900 shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
+            style={{ top: headerHeight + 16, left: "50%", transform: "translateX(-50%)" }}
+          >
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Профиль</p>
+            <Link
+              href="/auth/login"
+              onClick={() => setIsAccountMenuOpen(false)}
+              className="mt-3 block rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-semibold transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-800"
+            >
+              Войти
+            </Link>
+            <Link
+              href="/auth/register"
+              onClick={() => setIsAccountMenuOpen(false)}
+                className="mt-3 block rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-semibold transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-800"
+            >
+              Регистрация
+            </Link>
           </div>
         </div>
       )}
