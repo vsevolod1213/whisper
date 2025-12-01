@@ -37,10 +37,7 @@ export default function Header() {
       }
       const el = navRefs.current[activeIndex];
       if (el) {
-        setIndicator({
-          left: el.offsetLeft,
-          width: el.offsetWidth,
-        });
+        setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
       }
     };
     updateIndicator();
@@ -69,7 +66,6 @@ export default function Header() {
       }
       lastScrollY.current = currentY;
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -79,18 +75,23 @@ export default function Header() {
       return;
     }
     const handleClickOutside = (event: MouseEvent) => {
-      if (!headerRef.current) {
-        return;
-      }
+      if (!headerRef.current) return;
       if (!headerRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
         setIsAccountMenuOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen, isAccountMenuOpen]);
+
+  const handleToolToggle = () => {
+    setIsMenuOpen((prev) => {
+      const next = !prev;
+      if (next) setIsAccountMenuOpen(false);
+      return next;
+    });
+  };
 
   const handleAccountAction = () => {
     setIsMenuOpen(false);
@@ -99,19 +100,9 @@ export default function Header() {
       if (pathname !== "/account") {
         void router.push("/account");
       }
-      return;
+    } else {
+      setIsAccountMenuOpen((prev) => !prev);
     }
-    setIsAccountMenuOpen((prev) => !prev);
-  };
-
-  const handleToolToggle = () => {
-    setIsMenuOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        setIsAccountMenuOpen(false);
-      }
-      return next;
-    });
   };
 
   return (
@@ -123,107 +114,112 @@ export default function Header() {
         hideHeader ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      <div className="container relative mx-auto flex items-center justify-between gap-4 px-4 py-4">
-        <Link
-          href="/"
-          onClick={() => {
-            setIsMenuOpen(false);
-            setIsAccountMenuOpen(false);
-          }}
-          className="inline-flex items-center rounded-full border border-transparent pl-0 pr-4 py-5 text-lg font-semibold tracking-tight text-slate-900 transition hover:text-purple-500 dark:text-white dark:hover:text-purple-300 sm:border-none sm:px-10"
-        >
-          Filety
-        </Link>
-
-        <div className="absolute inset-0 flex items-center justify-center sm:hidden">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between sm:hidden">
+          <Link
+            href="/"
+            onClick={() => {
+              setIsMenuOpen(false);
+              setIsAccountMenuOpen(false);
+            }}
+            className="inline-flex items-center text-lg font-semibold tracking-tight text-slate-900 transition hover:text-purple-500 dark:text-white dark:hover:text-purple-300"
+          >
+            Filety
+          </Link>
           <button
             type="button"
             onClick={handleToolToggle}
-            className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
           >
             Инструменты
           </button>
+          <button
+            type="button"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            onClick={handleAccountAction}
+            aria-label={isAuthenticated ? "Открыть кабинет" : "Меню авторизации"}
+            disabled={loading}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="h-5 w-5"
+            >
+              <path d="M12 12c2.623 0 4.75-2.127 4.75-4.75S14.623 2.5 12 2.5 7.25 4.627 7.25 7.25 9.377 12 12 12Z" />
+              <path d="M4 20.25c0-3.314 3.134-6 7-6s7 2.686 7 6" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
-        <nav className="relative hidden items-center gap-2 rounded-full border border-slate-200/60 bg-slate-100/60 px-1 py-1 dark:border-slate-800/60 dark:bg-slate-900/60 sm:flex">
-          <span
-            className={`absolute left-0 top-0 h-full rounded-full bg-slate-900 text-white transition-all duration-300 ease-out dark:bg-white ${
-              showIndicator ? "opacity-100" : "opacity-0"
-            }`}
-            style={{
-              width: indicator.width,
-              transform: `translateX(${indicator.left}px)`,
-            }}
-            aria-hidden
-          />
-          {NAV_ITEMS.map(({ href, label }, index) => {
-            const active = index === activeIndex;
-            return (
-              <Link
-                key={href}
-                href={href}
-                ref={(node) => {
-                  navRefs.current[index] = node;
-                }}
-                className={`relative z-10 rounded-full px-4 py-2 text-sm font-medium transition ${
-                  active
-                    ? "text-white dark:text-slate-900"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-                }`}
-              >
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
+        <div className="hidden items-center justify-between gap-4 sm:flex">
+          <Link
+            href="/"
+            className="inline-flex items-center rounded-full px-10 py-5 text-lg font-semibold tracking-tight text-slate-900 transition hover:text-purple-500 dark:text-white dark:hover:text-purple-300"
+          >
+            Filety
+          </Link>
 
-        <div className="flex items-center gap-2">
-          {loading ? (
-            <div className="hidden h-10 w-36 rounded-full bg-slate-200/70 sm:block" aria-hidden />
-          ) : isAuthenticated ? (
-            <Link
-              href="/account"
-              className="hidden rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-purple-400 hover:text-purple-500 dark:border-slate-700 dark:text-slate-200 dark:hover:text-white sm:inline-flex"
-            >
-              Кабинет
-            </Link>
-          ) : (
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link
-                href="/auth/login"
-                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:text-slate-200 dark:hover:text-white"
-              >
-                Войти
-              </Link>
-              <Link
-                href="/auth/register"
-                className="rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 active:scale-95"
-              >
-                Регистрация
-              </Link>
-            </div>
-          )}
+          <nav className="relative hidden items-center gap-2 rounded-full border border-slate-200/60 bg-slate-100/60 px-1 py-1 dark:border-slate-800/60 dark:bg-slate-900/60 sm:flex">
+            <span
+              className={`absolute left-0 top-0 h-full rounded-full bg-slate-900 text-white transition-all duration-300 ease-out dark:bg-white ${
+                showIndicator ? "opacity-100" : "opacity-0"
+              }`}
+              style={{
+                width: indicator.width,
+                transform: `translateX(${indicator.left}px)`,
+              }}
+              aria-hidden
+            />
+            {NAV_ITEMS.map(({ href, label }, index) => {
+              const active = index === activeIndex;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  ref={(node) => {
+                    navRefs.current[index] = node;
+                  }}
+                  className={`relative z-10 rounded-full px-4 py-2 text-sm font-medium transition ${
+                    active
+                      ? "text-white dark:text-slate-900"
+                      : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
 
-          <div className="sm:hidden">
-            <button
-              type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-              onClick={handleAccountAction}
-              aria-label={isAuthenticated ? "Открыть кабинет" : "Меню авторизации"}
-              disabled={loading}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                className="h-5 w-5"
+          <div className="flex items-center gap-2">
+            {loading ? (
+              <div className="hidden h-10 w-36 rounded-full bg-slate-200/70 sm:block" aria-hidden />
+            ) : isAuthenticated ? (
+              <Link
+                href="/account"
+                className="hidden rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-purple-400 hover:text-purple-500 dark:border-slate-700 dark:text-slate-200 dark:hover:text-white sm:inline-flex"
               >
-                <path d="M12 12c2.623 0 4.75-2.127 4.75-4.75S14.623 2.5 12 2.5 7.25 4.627 7.25 7.25 9.377 12 12 12Z" />
-                <path d="M4 20.25c0-3.314 3.134-6 7-6s7 2.686 7 6" strokeLinecap="round" />
-              </svg>
-            </button>
+                Кабинет
+              </Link>
+            ) : (
+              <div className="hidden items-center gap-2 sm:flex">
+                <Link
+                  href="/auth/login"
+                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:text-slate-200 dark:hover:text-white"
+                >
+                  Войти
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 active:scale-95"
+                >
+                  Регистрация
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -238,7 +234,7 @@ export default function Header() {
           />
           <div
             className="fixed z-30 w-64 rounded-3xl border border-slate-200 bg-white/95 p-5 text-slate-900 shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-            style={{ top: headerHeight + 16, right: 16 }}
+            style={{ top: headerHeight + 16, left: "50%", transform: "translateX(-50%)" }}
           >
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Навигация</p>
             {NAV_ITEMS.map(({ href, label }) => (
@@ -251,37 +247,6 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-          </div>
-        </div>
-      )}
-
-      {!loading && !isAuthenticated && isAccountMenuOpen && (
-        <div className="sm:hidden">
-          <div
-            className="fixed inset-x-0 z-20 bg-slate-900/40 backdrop-blur-sm"
-            style={{ top: headerHeight }}
-            onClick={() => setIsAccountMenuOpen(false)}
-            aria-hidden
-          />
-          <div
-            className="fixed z-30 w-64 rounded-3xl border border-slate-200 bg-white/95 p-5 text-slate-900 shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-            style={{ top: headerHeight + 16, left: "50%", transform: "translateX(-50%)" }}
-          >
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Профиль</p>
-            <Link
-              href="/auth/login"
-              onClick={() => setIsAccountMenuOpen(false)}
-              className="mt-3 block rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-semibold transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-800"
-            >
-              Войти
-            </Link>
-            <Link
-              href="/auth/register"
-              onClick={() => setIsAccountMenuOpen(false)}
-                className="mt-3 block rounded-2xl border border-slate-200 px-4 py-3 text-center text-sm font-semibold transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-800"
-            >
-              Регистрация
-            </Link>
           </div>
         </div>
       )}
