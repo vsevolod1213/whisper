@@ -11,7 +11,7 @@ const NAV_ITEMS = [
 
 export default function Header() {
   const { pathname } = useRouter();
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const headerRef = useRef<HTMLElement | null>(null);
   const navRefs = useRef<Array<HTMLAnchorElement | null>>([]);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
@@ -58,19 +58,12 @@ export default function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
-      const isMobile = window.innerWidth < 640;
-      if (!isMobile) {
-        setHideHeader(false);
-        return;
-      }
-
-      if (currentY > lastScrollY.current + 10 && currentY > 80) {
+      if (currentY > lastScrollY.current + 15 && currentY > 80) {
         setHideHeader(true);
         setIsMenuOpen(false);
-      } else if (currentY < lastScrollY.current - 10) {
+      } else if (currentY < lastScrollY.current - 15) {
         setHideHeader(false);
       }
-
       lastScrollY.current = currentY;
     };
 
@@ -143,7 +136,7 @@ export default function Header() {
             >
               Кабинет
             </Link>
-          ) : !loading ? (
+          ) : (
             <div className="hidden items-center gap-2 sm:flex">
               <Link
                 href="/auth/login"
@@ -158,7 +151,7 @@ export default function Header() {
                 Регистрация
               </Link>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
 
@@ -185,7 +178,7 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-            {!isAuthenticated && !loading && (
+            {!isAuthenticated && (
               <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-200 pt-3 text-sm dark:border-slate-800">
                 <Link
                   href="/auth/login"
