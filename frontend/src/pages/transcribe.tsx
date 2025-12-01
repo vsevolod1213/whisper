@@ -6,15 +6,15 @@ import { useAnonUser } from "@/context/AnonUserContext";
 import { formatDuration } from "@/lib/utils";
 
 const stats = [
-  { label: "Размер файла", value: "до 2 ГБ" },
-  { label: "Поддерживаемые языки", value: "Русский · English" },
-  { label: "Экспорт", value: "TXT · SRT · VTT" },
+  { label: "Размер файла", value: "до 20 МБ" },
+  { label: "Форматы", value: "MP3, WAV, M4A, MP4" },
+  { label: "Результат", value: "копирование текста или TXT" },
 ];
 
 const highlights = [
-  "Отлавливаем шумы и автоматически выравниваем громкость",
-  "Сохраняем таймкоды и делим текст на говорящих",
-  "Работаем с многочасовыми лекциями, интервью и подкастами",
+  "Принимаем популярные аудио и видео контенты",
+  "Обрабатываем на сервере — браузер остаётся отзывчивым",
+  "Получаете чистый текст сразу после загрузки",
 ];
 
 const steps = [
@@ -24,8 +24,8 @@ const steps = [
 ];
 
 export default function TranscribePage() {
-  const title = "Транскрипция аудио и видео в текст онлайн — Filety";
-  const description = "Быстрая и точная транскрипция аудио и видео. Бесплатный лимит, работа без регистрации, поддержка длинных файлов и экспорт в TXT/SRT/VTT.";
+  const title = "Транскрипция аудио и видео онлайн — Filety";
+  const description = "Переводите интервью, лекции, созвоны и подкасты в текст. Бесплатный дневной лимит, загрузка без регистрации, копирование результата или скачивание TXT.";
   const url = "https://filety.ru/transcribe";
   const ogImage = "https://filety.ru/og-transcribe.png";
 
@@ -117,16 +117,16 @@ export default function TranscribePage() {
       </Head>
 
       <main className="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50">
-        <section className="relative overflow-hidden border-b border-slate-200/60 bg-gradient-to-br from-slate-950 via-purple-800 to-rose-500 text-white dark:border-slate-800/60">
-          <div className="absolute inset-0 opacity-30" aria-hidden>
-            <div className="h-full w-full bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.4),_transparent_60%)]" />
+        <section className="relative overflow-hidden border-b border-slate-200/60 bg-gradient-to-br from-slate-950 via-purple-800 to-rose-500 text-white dark:border-slate-800/50">
+          <div className="absolute inset-0 opacity-40" aria-hidden>
+            <div className="h-full w-full bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35),_transparent_60%)]" />
           </div>
           <div className="container relative mx-auto grid gap-10 px-4 py-20 sm:py-24 lg:grid-cols-[1.1fr,0.9fr]">
             <div className="space-y-6">
               <p className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em]">Transcribe</p>
-              <h1 className="text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">AI‑транскрипция под любые задачи</h1>
+              <h1 className="text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">Транскрипция аудио и видео в текст</h1>
               <p className="text-base text-white/80 sm:text-lg">
-                Filety превращает часы аудио и видео в структурированный текст. Сохраняем таймкоды, поддерживаем командную работу и упрощаем монтаж.
+                Загрузите интервью, лекцию, созвон или голосовое сообщение — Filety быстро превратит запись в читаемый текст прямо в браузере.
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
                 {stats.map((stat) => (
@@ -148,7 +148,7 @@ export default function TranscribePage() {
                   href="/pricing"
                   className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5"
                 >
-                  Открыть тарифы
+                  Посмотреть тарифы
                 </Link>
                 <Link
                   href="/convert"
@@ -242,6 +242,21 @@ export default function TranscribePage() {
           </div>
         </section>
 
+        <section className="border-b border-slate-200/60 bg-white py-12 dark:border-slate-800/60 dark:bg-slate-950">
+          <div className="container mx-auto space-y-4 px-4 text-slate-700 dark:text-slate-200">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Скоро в Filety</p>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Что появится следующим</h2>
+            <ul className="list-disc space-y-2 pl-6 text-sm">
+              <li>Сохранение таймкодов и экспорт субтитров</li>
+              <li>Разделение текста по говорящим</li>
+              <li>Поддержка длинных проектов и лекций</li>
+            </ul>
+            <p className="text-sm">
+              Мы постепенно включаем эти функции. Подписывайтесь на новости в личном кабинете или ТГ-канале, чтобы узнать первыми.
+            </p>
+          </div>
+        </section>
+
         <section className="bg-white py-16 dark:bg-slate-950">
           <div className="container mx-auto grid gap-6 px-4 md:grid-cols-3">
             {steps.map((step) => (
@@ -259,21 +274,20 @@ export default function TranscribePage() {
         {/* SEO-блок */}
         <section className="border-t border-slate-200/60 bg-white py-16 dark:border-slate-800/60 dark:bg-slate-950">
           <div className="container mx-auto max-w-3xl space-y-5 px-4 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Filety — цифровой помощник для работы с аудио и видео</h2>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Кому полезен Filety</h2>
             <p>
-              Транскрибировать запись вручную сложно: нужно перематывать, ставить паузы, следить за таймкодами. Filety автоматизирует эту работу. Сервис
-              безопасно принимает файлы до нескольких гигабайт, поддерживает лекции, подкасты, интервью, созвоны и документальные проекты. Каждая запись
-              проходит через Whisper и дополнительные фильтры — результат получается чистым и готовым к публикации или монтажу.
+              Если вы регулярно работаете с интервью, лекциями, звонками или подкастами, Filety снимает рутину. Сервис принимает записи размером до ~20&nbsp;МБ,
+              обрабатывает их на сервере и возвращает текст, который можно тут же скопировать или скачать в TXT. Не нужно ставить на паузу и вручную печатать —
+              достаточно загрузить файл и дождаться готового результата.
             </p>
             <p>
-              Filety подходит журналистам, монтажёрам, продюсерам, студентам, исследователям и всем, кто работает с устной речью. Бесплатный дневной лимит
-              позволяет быстро протестировать качество, а платные тарифы расширяют лимиты и открывают командные возможности. Экспорт в TXT, SRT или VTT
-              помогает сразу отправить текст в монтажную программу, LMS или корпоративный портал.
+              Filety подходит журналистам, монтажёрам, маркетологам, преподавателям, студентам и всем, кто хочет экономить время на расшифровке. Бесплатный дневной
+              лимит позволяет протестировать качество, а более крупные проекты можно проводить постепенно, сохраняя прогресс. Серверная обработка гарантирует, что
+              браузер остаётся отзывчивым, а файлы не попадают в сторонние сервисы.
             </p>
             <p>
-              Попробуйте загрузить любой файл: обработка происходит на сервере, поэтому интерфейс остаётся отзывчивым. Filety запоминает прогресс
-              и отображает готовый текст, чтобы вы могли скопировать его или скачать в нужном формате. Чем больше проектов вы ведёте, тем заметнее экономия
-              времени — Filety убирает рутину и позволяет сосредоточиться на содержании.
+              Мы продолжаем развивать платформу и добавлять функции, которые чаще всего просят пользователи. Следите за обновлениями — Filety постепенно станет
+              полноценным рабочим столом для тех, кто работает с аудио и видео.
             </p>
           </div>
         </section>
