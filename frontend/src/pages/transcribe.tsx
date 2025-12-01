@@ -121,8 +121,8 @@ export default function TranscribePage() {
           <div className="absolute inset-0 opacity-40" aria-hidden>
             <div className="h-full w-full bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35),_transparent_60%)]" />
           </div>
-          <div className="container relative mx-auto grid gap-10 px-4 py-20 sm:py-24 lg:grid-cols-[1.1fr,0.9fr]">
-            <div className="space-y-6">
+          <div className="container relative mx-auto flex flex-col gap-12 px-4 py-20 sm:py-24 lg:flex-row lg:items-start">
+            <div className="space-y-6 lg:flex-1">
               <p className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em]">Transcribe</p>
               <h1 className="text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">Транскрипция аудио и видео в текст</h1>
               <p className="text-base text-white/80 sm:text-lg">
@@ -159,7 +159,7 @@ export default function TranscribePage() {
               </div>
             </div>
 
-            <div id="upload" className="space-y-4">
+            <div id="upload" className="space-y-4 lg:max-w-lg lg:flex-1">
               <FileUploader onUploadStart={handleUploadStart} onUploadSuccess={handleUploadSuccess} onUploadError={handleUploadError} />
 
               <div className="rounded-3xl border border-white/30 bg-white/95 p-5 text-sm text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/10 dark:text-white">
