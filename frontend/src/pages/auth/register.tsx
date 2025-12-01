@@ -17,6 +17,10 @@ export default function RegisterPage() {
 
   const passwordValidation = useMemo(() => {
     if (password.length === 0) return null;
+    const asciiOnly = /^[\x20-\x7E]+$/.test(password);
+    if (!asciiOnly) {
+      return { valid: false, message: "Используйте только латинские буквы и символы" };
+    }
     if (password.length < 8) {
       return { valid: false, message: "Минимум 8 символов" };
     }
@@ -27,7 +31,8 @@ export default function RegisterPage() {
   }, [password]);
 
   const isFormValid = useMemo(() => {
-    const hasValidEmail = email.trim().length > 0;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const hasValidEmail = emailPattern.test(email.trim());
     return hasValidEmail && Boolean(passwordValidation?.valid);
   }, [email, passwordValidation]);
 
@@ -43,12 +48,13 @@ export default function RegisterPage() {
       await router.push("/account");
     } catch (error) {
       if (error instanceof ApiError) {
-        if (error.status === 400) {
-          setErrorMessage(error.message);
-        } else if ((error.status ?? 0) >= 500) {
+        const status = error.status ?? 0;
+        if (status === 400) {
+          setErrorMessage("Такой email уже зарегистрирован");
+        } else if (status >= 500) {
           setErrorMessage("Произошла ошибка, попробуйте позже");
         } else {
-          setErrorMessage(error.message);
+          setErrorMessage("Не удалось создать аккаунт. Попробуйте снова.");
         }
       } else {
         setErrorMessage("Произошла ошибка, попробуйте позже");

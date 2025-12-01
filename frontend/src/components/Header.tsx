@@ -10,15 +10,18 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
-  const { pathname } = useRouter();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { pathname } = router;
+  const { user, loading } = useAuth();
   const headerRef = useRef<HTMLElement | null>(null);
   const navRefs = useRef<Array<HTMLAnchorElement | null>>([]);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [hideHeader, setHideHeader] = useState(false);
   const lastScrollY = useRef(0);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const isAuthenticated = Boolean(user);
 
   const activeIndex = useMemo(
@@ -61,6 +64,7 @@ export default function Header() {
       if (currentY > lastScrollY.current + 15 && currentY > 80) {
         setHideHeader(true);
         setIsMenuOpen(false);
+        setIsAccountMenuOpen(false);
       } else if (currentY < lastScrollY.current - 15) {
         setHideHeader(false);
       }
@@ -71,6 +75,39 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!isAccountMenuOpen) {
+      return;
+    }
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!accountMenuRef.current) {
+        return;
+      }
+      if (!accountMenuRef.current.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isAccountMenuOpen]);
+
+  const handleAccountAction = () => {
+    if (isAuthenticated) {
+      setIsAccountMenuOpen(false);
+      if (pathname !== "/account") {
+        void router.push("/account");
+      }
+      return;
+    }
+    setIsAccountMenuOpen((prev) => !prev);
+  };
+
+  const handleToolToggle = () => {
+    setIsMenuOpen((prev) => !prev);
+    setIsAccountMenuOpen(false);
+  };
+
   return (
     <header
       ref={(node) => {
@@ -80,13 +117,21 @@ export default function Header() {
         hideHeader ? "-translate-y-full" : "translate-y-0"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
+      <div className="container relative mx-auto flex items-center justify-between gap-4 px-4 py-4">
         <Link
           href="/"
           className="inline-flex items-center rounded-full px-10 py-5 text-lg font-semibold tracking-tight text-slate-900 transition hover:text-purple-500 dark:text-white dark:hover:text-purple-300"
         >
           Filety
         </Link>
+
+        <button
+          type="button"
+          onClick={handleToolToggle}
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 sm:hidden"
+        >
+          Инструменты
+        </button>
 
         <nav className="relative hidden items-center gap-2 rounded-full border border-slate-200/60 bg-slate-100/60 px-1 py-1 dark:border-slate-800/60 dark:bg-slate-900/60 sm:flex">
           <span
@@ -121,15 +166,9 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:text-slate-200 sm:hidden"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-          >
-            Инструменты
-          </button>
-
-          {isAuthenticated ? (
+          {loading ? (
+            <div className="hidden h-10 w-36 rounded-full bg-slate-200/70 sm:block" aria-hidden />
+          ) : isAuthenticated ? (
             <Link
               href="/account"
               className="hidden rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-purple-400 hover:text-purple-500 dark:border-slate-700 dark:text-slate-200 dark:hover:text-white sm:inline-flex"
@@ -152,6 +191,48 @@ export default function Header() {
               </Link>
             </div>
           )}
+
+          <div className="relative sm:hidden" ref={accountMenuRef}>
+            <button
+              type="button"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              onClick={handleAccountAction}
+              aria-label={isAuthenticated ? "Открыть кабинет" : "Меню авторизации"}
+              disabled={loading}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="h-5 w-5"
+              >
+                <path d="M12 12c2.623 0 4.75-2.127 4.75-4.75S14.623 2.5 12 2.5 7.25 4.627 7.25 7.25 9.377 12 12 12Z" />
+                <path d="M4 20.25c0-3.314 3.134-6 7-6s7 2.686 7 6" strokeLinecap="round" />
+              </svg>
+            </button>
+            {!loading && !isAuthenticated && isAccountMenuOpen && (
+              <div
+                className="absolute right-0 z-40 mt-3 w-40 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+              >
+                <Link
+                  href="/auth/login"
+                  onClick={() => setIsAccountMenuOpen(false)}
+                  className="block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  Войти
+                </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setIsAccountMenuOpen(false)}
+                  className="mt-1 block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  Регистрация
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -178,7 +259,7 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-            {!isAuthenticated && (
+            {!isAuthenticated && !loading && (
               <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-200 pt-3 text-sm dark:border-slate-800">
                 <Link
                   href="/auth/login"

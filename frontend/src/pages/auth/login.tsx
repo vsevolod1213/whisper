@@ -28,12 +28,13 @@ export default function LoginPage() {
       await router.push("/account");
     } catch (error) {
       if (error instanceof ApiError) {
-        if (error.status === 400 || error.status === 401) {
-          setErrorMessage(error.message);
-        } else if ((error.status ?? 0) >= 500) {
+        const status = error.status ?? 0;
+        if (status === 400 || status === 401) {
+          setErrorMessage("Неверный email или пароль");
+        } else if (status >= 500) {
           setErrorMessage("Произошла ошибка, попробуйте позже");
         } else {
-          setErrorMessage(error.message);
+          setErrorMessage("Не удалось выполнить вход. Попробуйте снова.");
         }
       } else {
         setErrorMessage("Произошла ошибка, попробуйте позже");
