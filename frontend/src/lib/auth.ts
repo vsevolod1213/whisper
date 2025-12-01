@@ -26,7 +26,9 @@ type RequestOptions = RequestInit & {
   retry?: boolean;
 };
 
+const ACCESS_TOKEN_KEY = "filety_access_token";
 let accessToken: string | null = null;
+let isHydrated = false;
 let refreshPromise: Promise<string> | null = null;
 
 export class ApiError extends Error {
@@ -101,6 +103,22 @@ const buildHeaders = (headers?: HeadersInit) => {
 
 const setAccessToken = (token: string | null) => {
   accessToken = token;
+  if (typeof window === "undefined") {
+    return;
+  }
+  if (token) {
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  } else {
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  }
+};
+
+export const hydrateAccessToken = () => {
+  if (isHydrated || typeof window === "undefined") {
+    return;
+  }
+  accessToken = window.localStorage.getItem(ACCESS_TOKEN_KEY);
+  isHydrated = true;
 };
 
 const refreshAccessToken = async () => {
@@ -142,6 +160,7 @@ const refreshAccessToken = async () => {
 };
 
 const apiFetch = async <T>(path: string, options: RequestOptions = {}): Promise<T> => {
+  hydrateAccessToken();
   const { auth, retry, headers, ...rest } = options;
   const mergedHeaders = buildHeaders(headers);
 

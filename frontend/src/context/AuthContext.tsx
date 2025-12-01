@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import {
   ApiError,
   fetchCurrentUser as fetchCurrentUserApi,
+  hydrateAccessToken,
   loginUser,
   logoutAllSessions,
   logoutUser,
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     const run = async () => {
+      hydrateAccessToken();
       try {
         await fetchCurrentUser();
       } catch (error) {
