@@ -104,8 +104,13 @@ export default function Header() {
   };
 
   const handleToolToggle = () => {
-    setIsMenuOpen((prev) => !prev);
-    setIsAccountMenuOpen(false);
+    setIsMenuOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setIsAccountMenuOpen(false);
+      }
+      return next;
+    });
   };
 
   return (
@@ -118,12 +123,19 @@ export default function Header() {
       }`}
     >
       <div className="container relative mx-auto flex items-center justify-between gap-4 px-4 py-4">
-        <Link
-          href="/"
-          className="inline-flex items-center rounded-full pl-0 pr-4 py-5 text-lg font-semibold tracking-tight text-slate-900 transition hover:text-purple-500 dark:text-white dark:hover:text-purple-300 sm:px-10"
+        <button
+          type="button"
+          onClick={() => {
+            setIsMenuOpen(false);
+            setIsAccountMenuOpen(false);
+            if (pathname !== "/") {
+              void router.push("/");
+            }
+          }}
+          className="inline-flex items-center rounded-full border border-transparent pl-0 pr-4 py-5 text-lg font-semibold tracking-tight text-slate-900 transition hover:text-purple-500 dark:text-white dark:hover:text-purple-300 sm:border-none sm:px-10"
         >
           Filety
-        </Link>
+        </button>
 
         <div className="absolute inset-0 flex items-center justify-center sm:hidden">
           <button
@@ -214,24 +226,41 @@ export default function Header() {
                 <path d="M4 20.25c0-3.314 3.134-6 7-6s7 2.686 7 6" strokeLinecap="round" />
               </svg>
             </button>
-            {!loading && !isAuthenticated && isAccountMenuOpen && (
+            {!loading && isAccountMenuOpen && (
               <div
-                className="absolute right-0 z-40 mt-3 w-40 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+                className="absolute right-0 z-40 mt-3 w-56 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700 shadow-2xl dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
               >
-                <Link
-                  href="/auth/login"
-                  onClick={() => setIsAccountMenuOpen(false)}
-                  className="block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  Войти
-                </Link>
-                <Link
-                  href="/auth/register"
-                  onClick={() => setIsAccountMenuOpen(false)}
-                  className="mt-1 block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  Регистрация
-                </Link>
+                {isAuthenticated ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAccountMenuOpen(false);
+                      if (pathname !== "/account") {
+                        void router.push("/account");
+                      }
+                    }}
+                    className="w-full rounded-xl px-3 py-2 text-left transition hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    Перейти в кабинет
+                  </button>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      Войти
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="mt-1 block rounded-xl px-3 py-2 transition hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      Регистрация
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -248,7 +277,7 @@ export default function Header() {
           />
           <div
             className="fixed z-30 w-64 rounded-3xl border border-slate-200 bg-white/95 p-5 text-slate-900 shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50"
-            style={{ top: headerHeight + 8, right: 16 }}
+            style={{ top: headerHeight + 16, right: 16 }}
           >
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Навигация</p>
             {NAV_ITEMS.map(({ href, label }) => (
@@ -261,24 +290,6 @@ export default function Header() {
                 {label}
               </Link>
             ))}
-            {!isAuthenticated && !loading && (
-              <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-200 pt-3 text-sm dark:border-slate-800">
-                <Link
-                  href="/auth/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex-1 rounded-full border border-slate-300 px-4 py-2 text-center font-semibold transition hover:border-purple-400 hover:text-purple-500 active:scale-95 dark:border-slate-700"
-                >
-                  Войти
-                </Link>
-                <Link
-                  href="/auth/register"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex-1 rounded-full bg-purple-600 px-4 py-2 text-center font-semibold text-white transition hover:-translate-y-0.5 active:scale-95"
-                >
-                  Регистрация
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       )}
