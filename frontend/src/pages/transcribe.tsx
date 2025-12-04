@@ -133,114 +133,116 @@ export default function TranscribePage() {
           <div className="absolute inset-0 opacity-40" aria-hidden>
             <div className="h-full w-full bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35),_transparent_60%)]" />
           </div>
-          <div className="container relative mx-auto flex flex-col gap-12 px-4 py-20 sm:py-24 lg:flex-row lg:items-start">
-            <div className="space-y-6 lg:flex-1">
-              <p className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em]">Transcribe</p>
-              <h1 className="text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">Транскрипция аудио и видео в текст</h1>
-              <p className="text-base text-white/80 sm:text-lg">
-                Загрузите интервью, лекцию, созвон или голосовое сообщение — Filety быстро превратит запись в читаемый текст прямо в браузере.
-              </p>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl bg-white/10 p-4">
-                    <p className="text-xs uppercase tracking-[0.3em] text-white/70">{stat.label}</p>
-                    <p className="mt-1 text-lg font-semibold">{stat.value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-2 text-sm text-white/80">
-                {highlights.map((item) => (
-                  <span key={item} className="rounded-full border border-white/30 px-3 py-1">
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5"
-                >
-                  Посмотреть тарифы
-                </Link>
-                <Link
-                  href="/convert"
-                  className="inline-flex items-center justify-center rounded-full bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5"
-                >
-                  Перейти к конвертации
-                </Link>
-              </div>
-            </div>
-
-            <div id="upload" className="space-y-4 lg:max-w-lg lg:flex-1">
-              <FileUploader onUploadStart={handleUploadStart} onUploadSuccess={handleUploadSuccess} onUploadError={handleUploadError} />
-
-              <div className="rounded-3xl border border-white/30 bg-white/95 p-5 text-sm text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/10 dark:text-white">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold text-slate-900 dark:text-white">Сколько осталось бесплатно</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void refreshUsage({ force: true }).catch(() => {
-                        // ошибки уже отображаются в блоке
-                      });
-                    }}
-                    className="text-xs font-semibold text-purple-600 transition hover:text-purple-400 disabled:opacity-40 dark:text-purple-200"
-                    disabled={usageLoading}
-                  >
-                    Обновить
-                  </button>
-                </div>
-                <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-white/60">Сегодня доступно</p>
-                <p className={`mt-1 text-lg font-semibold ${limitReached ? "text-rose-600 dark:text-rose-400" : ""}`}>
-                  {usageLoading ? "Обновляем…" : limitReached ? "0 мин" : remainingText}
+          <div className="container relative mx-auto px-4 py-20 sm:py-24">
+            <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
+              <div className="space-y-6 lg:flex-1">
+                <p className="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em]">Transcribe</p>
+                <h1 className="text-3xl font-semibold leading-tight sm:text-4xl md:text-5xl">Транскрипция аудио и видео в текст</h1>
+                <p className="text-base text-white/80 sm:text-lg">
+                  Загрузите интервью, лекцию, созвон или голосовое сообщение — Filety быстро превратит запись в читаемый текст прямо в браузере.
                 </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-white/70">{usageLoading ? "—" : usageSourceLabel}</p>
-                {limitReached && !usageLoading && (
-                  <p className="mt-2 text-sm text-rose-600 dark:text-rose-300">Лимит израсходован — обновите тариф или попробуйте завтра.</p>
-                )}
-                {showAnonError && !usageLoading && (
-                  <p className="mt-2 rounded-2xl bg-rose-100/60 px-3 py-2 text-xs text-rose-700 dark:bg-rose-500/20 dark:text-rose-200">{anonError}</p>
-                )}
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {stats.map((stat) => (
+                    <div key={stat.label} className="rounded-2xl bg-white/10 p-4">
+                      <p className="text-xs uppercase tracking-[0.3em] text-white/70">{stat.label}</p>
+                      <p className="mt-1 text-lg font-semibold">{stat.value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 text-sm text-white/80">
+                  {highlights.map((item) => (
+                    <span key={item} className="rounded-full border border-white/30 px-3 py-1">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5"
+                  >
+                    Посмотреть тарифы
+                  </Link>
+                  <Link
+                    href="/convert"
+                    className="inline-flex items-center justify-center rounded-full bg-white/10 px-6 py-3 text-base font-semibold text-white transition hover:-translate-y-0.5"
+                  >
+                    Перейти к конвертации
+                  </Link>
+                </div>
               </div>
 
-              {(resultText || error) && (
-                <div className="w-full rounded-[28px] border border-white/30 bg-white/95 p-5 text-sm text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/10 dark:text-white">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold text-slate-900 dark:text-white">Результат транскрипции</p>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleCopy}
-                        disabled={!resultText}
-                        className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-purple-400 hover:text-purple-500 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300"
-                      >
-                        {copied ? "Скопировано" : "Копировать"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDownload}
-                        disabled={!resultText}
-                        className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-purple-400 hover:text-purple-500 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300"
-                      >
-                        Скачать TXT
-                      </button>
-                    </div>
+              <div id="upload" className="space-y-4 lg:max-w-lg lg:flex-1">
+                <FileUploader onUploadStart={handleUploadStart} onUploadSuccess={handleUploadSuccess} onUploadError={handleUploadError} />
+
+                <div className="rounded-3xl border border-white/30 bg-white/95 p-5 text-sm text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/10 dark:text-white">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-slate-900 dark:text-white">Сколько осталось бесплатно</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void refreshUsage({ force: true }).catch(() => {
+                          // ошибки уже отображаются в блоке
+                        });
+                      }}
+                      className="text-xs font-semibold text-purple-600 transition hover:text-purple-400 disabled:opacity-40 dark:text-purple-200"
+                      disabled={usageLoading}
+                    >
+                      Обновить
+                    </button>
                   </div>
-
-                  {error && (
-                    <p className="mt-4 rounded-2xl bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:bg-rose-500/20 dark:text-rose-200">
-                      {error}
-                    </p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-white/60">Сегодня доступно</p>
+                  <p className={`mt-1 text-lg font-semibold ${limitReached ? "text-rose-600 dark:text-rose-400" : ""}`}>
+                    {usageLoading ? "Обновляем…" : limitReached ? "0 мин" : remainingText}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-white/70">{usageLoading ? "—" : usageSourceLabel}</p>
+                  {limitReached && !usageLoading && (
+                    <p className="mt-2 text-sm text-rose-600 dark:text-rose-300">Лимит израсходован — обновите тариф или попробуйте завтра.</p>
                   )}
-
-                  {resultText && (
-                    <div className="mt-4 rounded-2xl border border-slate-200/80 bg-white/70 p-4 text-sm leading-relaxed shadow-inner dark:border-white/20 dark:bg-white/5">
-                      <p className="whitespace-pre-wrap break-words">{resultText}</p>
-                    </div>
+                  {showAnonError && !usageLoading && (
+                    <p className="mt-2 rounded-2xl bg-rose-100/60 px-3 py-2 text-xs text-rose-700 dark:bg-rose-500/20 dark:text-rose-200">{anonError}</p>
                   )}
                 </div>
-              )}
+              </div>
             </div>
+
+            {(resultText || error) && (
+              <div className="mt-6 w-full rounded-[28px] border border-white/30 bg-white/95 p-5 text-sm text-slate-900 shadow-xl dark:border-white/10 dark:bg-white/10 dark:text-white">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="font-semibold text-slate-900 dark:text-white">Результат транскрипции</p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      disabled={!resultText}
+                      className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-purple-400 hover:text-purple-500 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      {copied ? "Скопировано" : "Копировать"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownload}
+                      disabled={!resultText}
+                      className="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-purple-400 hover:text-purple-500 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300"
+                    >
+                      Скачать TXT
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <p className="mt-4 rounded-2xl bg-rose-50 px-3 py-2 text-sm text-rose-600 dark:bg-rose-500/20 dark:text-rose-200">
+                    {error}
+                  </p>
+                )}
+
+                {resultText && (
+                  <div className="mt-4 rounded-2xl border border-slate-200/80 bg-white/70 p-4 text-sm leading-relaxed shadow-inner dark:border-white/20 dark:bg-white/5">
+                    <p className="whitespace-pre-wrap break-words">{resultText}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
 

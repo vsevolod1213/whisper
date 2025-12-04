@@ -156,7 +156,7 @@ export default function FileUploader({ onUploadStart, onUploadSuccess, onUploadE
     <div className="rounded-[28px] border border-slate-200/70 bg-white/80 p-6 text-center shadow-2xl shadow-brand-700/20 backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/60">
       <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-700">Загрузка</p>
       <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Перетащите аудио или видео</h2>
-      <p className="mt-2 text-sm text-slate-500 dark:text-slate-300">Файлы до 2 ГБ, обработка сразу на сервере.</p>
+      <p className="mt-2 text-sm text-slate-500 dark:text-slate-300">Файлы до 20 МБ, обработка сразу на сервере.</p>
 
       <label
         htmlFor={inputId}
@@ -227,17 +227,10 @@ export default function FileUploader({ onUploadStart, onUploadSuccess, onUploadE
       <div className="mt-4 min-h-[56px] rounded-2xl bg-slate-50/80 px-4 py-3 text-sm text-slate-600 shadow-inner transition dark:bg-slate-900/40 dark:text-slate-200">
         {status === "idle" && <p>{STATUS_TEXT.idle}</p>}
 
-        {status === "uploading" && (
+        {(status === "uploading" || status === "processing") && (
           <div className="flex flex-col items-center gap-2">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-            <p className="font-medium text-brand-700">{STATUS_TEXT.uploading}</p>
-          </div>
-        )}
-
-        {status === "processing" && (
-          <div className="flex flex-col items-center gap-2">
-            <span className="h-2 w-2 animate-ping rounded-full bg-brand-600" />
-            <p className="font-medium text-brand-700">{STATUS_TEXT.processing}</p>
+            <p className="font-medium text-brand-700">{STATUS_TEXT[status]}</p>
           </div>
         )}
 
