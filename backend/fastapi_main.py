@@ -1,5 +1,5 @@
 # backend/fastapi_main.py
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -22,10 +22,13 @@ from backend.models.transcription_tasks import TranscriptionStatus, Transcriptio
 from backend.models.anon_users import AnonUser
 import math
 from uuid import UUID as UUID_cls
-from backend.schemas.anon_user import DAILY_LIMIT_ANON_USER
+from backend.core.limits import DAILY_LIMIT_ANON_USER, get_daily_limit_for_user
 from sqlalchemy import select, delete
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
+from backend.models.users import User
+from backend.api.v1.auth_users import get_current_user_optional
 
 MB = 1024 * 1024
 
@@ -39,6 +42,15 @@ app = FastAPI(title="Failety API")
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://filety.ru",
+                   "https://www.filety.ru",
+                   "https://api.filety.ru",],           
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(RateLimitExceeded)
 def ratelimit_handler(request, exc):
@@ -129,15 +141,21 @@ async def _process_task(task_id: str):
                 if db_task:
                     db_task.status = TranscriptionStatus.COMPLETED
                     db_task.transcription_text = text
+                    
+                    if duration_seconds is not None and duration_seconds > 0:
+                        if db_task.user_id is not None:
+                            user = db.get(User, db_task.user_id)
+                            if user:
+                                user.daily_used_time = (user.daily_used_time or 0) + duration_seconds
 
-                    if (
-                        db_task.anon_user_id is not None
-                        and duration_seconds is not None
-                        and duration_seconds > 0
-                    ):
-                        anon_user = db.get(AnonUser, db_task.anon_user_id)
-                        if anon_user:
-                            anon_user.daily_used_time += duration_seconds
+                        if db_task.anon_user_id is not None:
+                            anon_user = db.get(AnonUser, db_task.anon_user_id)
+                            if anon_user:
+                                current_used = anon_user.daily_used_time or 0
+                                new_used = current_used + duration_seconds
+                                if new_used > DAILY_LIMIT_ANON_USER:
+                                    new_used = DAILY_LIMIT_ANON_USER
+                                anon_user.daily_used_time = new_used
                     db.commit()
             finally:
                 db.close()
@@ -175,7 +193,11 @@ async def _process_task(task_id: str):
 
 
 @app.post("/translate/start")
-async def translate_start(file: UploadFile = File(...), anon_uuid: str | None = Form(None)):
+async def translate_start(
+    file: UploadFile = File(...),
+    anon_uuid: str | None = Form(None),
+    current_user: User | None = Depends(get_current_user_optional)
+):
     if anon_uuid is None:
         raise HTTPException(
             status_code=400, 
@@ -212,21 +234,36 @@ async def translate_start(file: UploadFile = File(...), anon_uuid: str | None = 
             db.add(anon_user)
             db.commit()
             db.refresh(anon_user)
-        used = anon_user.daily_used_time or 0
-        limit = DAILY_LIMIT_ANON_USER
-        remaining = limit - used
-        if remaining <= 0 or duration_seconds > remaining:
-            _safe_remove(input_path)
-            raise HTTPException(
-                status_code=400, 
-                detail="Daily limit exceeded"
-                )
+        used_anon = anon_user.daily_used_time or 0
+
+        if current_user is not None:
+            user_limit = get_daily_limit_for_user(current_user)
+            used_user = current_user.daily_used_time or 0
+
+            if user_limit is not None:
+                remaining = user_limit - used_user
+                if remaining <= 0 or duration_seconds > remaining:
+                    _safe_remove(input_path)
+                    raise HTTPException(
+                        status_code=400, 
+                        detail="User daily limit exceeded"
+                        )
+        else:
+            remaining_anon = DAILY_LIMIT_ANON_USER - used_anon
+            if remaining_anon <= 0 or duration_seconds > remaining_anon:
+                _safe_remove(input_path)
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Anon user daily limit exceeded"
+                    )
+
         
         db_task = TranscriptionTask(
-            anon_user_id=anon_user.id,
-            status=TranscriptionStatus.PENDING,
-            transcription_text=None,
-            transcription_json=None
+            anon_user_id = anon_user.id,
+            user_id = current_user.id if current_user is not None else None,
+            status = TranscriptionStatus.PENDING,
+            transcription_text = None,
+            transcription_json = None
         )
         db.add(db_task)
         db.commit()

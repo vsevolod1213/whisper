@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from backend.core.deps import get_db
@@ -34,6 +34,7 @@ def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 auth_scheme = HTTPBearer()
+auth_scheme_optional = HTTPBearer(auto_error = False)
 
 def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(auth_scheme),
@@ -53,6 +54,25 @@ def get_current_user(
     if not user:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="User not found")
     
+    return user
+def get_current_user_optional(
+    creds: HTTPAuthorizationCredentials | None = Security(auth_scheme_optional),
+    db: Session = Depends(get_db)
+):
+    if creds is None:
+        return None
+    
+    token = creds.credentials
+    try:
+        payload = decode_token(token)
+    except Exception:
+        return None
+    
+    if payload.get("type") != "access":
+        return None
+    
+    user_id = int(payload["sub"])
+    user = db.query(User).filter(User.id == user_id).first()
     return user
 
 @router.post("/register", response_model = UserOut, status_code = 201)

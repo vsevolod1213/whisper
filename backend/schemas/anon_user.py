@@ -1,8 +1,7 @@
 # backend/schemas/anon_user.py
 from pydantic import BaseModel
 from datetime import datetime
-
-DAILY_LIMIT_ANON_USER = 600 
+from backend.core.limits import DAILY_LIMIT_ANON_USER 
 
 class AnonUserRequest(BaseModel):
     uuid: str | None = None
