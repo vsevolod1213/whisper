@@ -39,7 +39,7 @@ def recent_transcriptions(
                     ))
             tasks = db.execute(stmb).scalars().all()
             
-    elif user is not None:
+    else:
         stmb = (select(
             TranscriptionTask
             ).where(
