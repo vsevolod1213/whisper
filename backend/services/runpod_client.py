@@ -9,7 +9,7 @@ settings = get_settings()
 RUNPOD_API = settings.runpod_api
 RUNPOD_ID = settings.runpod_id
 
-RUNPOD_RUN_URL = f"https://api.runpod.io/v2/{RUNPOD_ID}/run"
+RUNPOD_RUN_URL = f"https://api.runpod.ai/v2/{RUNPOD_ID}/run"
 RUNPOD_STATUS_URL = f"https://api.runpod.ai/v2/{RUNPOD_ID}/status"
 
 class RunpodError(Exception):
@@ -33,7 +33,7 @@ async def submit_audio_job(
             "task_id": task_id,
             "model_name": model_name,
             "language": language,
-            "file_name": file_name,
+            "filename": file_name,
             "audio_base64": audio_b64,  
         }
     }
@@ -52,15 +52,15 @@ async def submit_audio_job(
             raise RunpodError(f"Runpod API error: Missing job ID in response - {data}")
         return job_id
     
-    async def get_job_status(job_id: str) -> dict:
-        url = f"{RUNPOD_STATUS_URL}/{job_id}"
-        headers = {
-            "Authorization": RUNPOD_API
-        }       
-    
-        async with httpx.AsyncClient(timeout=60) as client:
-            resp = await client.get(url, headers=headers)
-            
-        if resp.status_code != 200:
-            raise RunpodError(f"Runpod API error: {resp.status_code} - {resp.text}")
-        return resp.json()
+async def get_job_status(job_id: str) -> dict:
+    url = f"{RUNPOD_STATUS_URL}/{job_id}"
+    headers = {
+        "Authorization": RUNPOD_API
+    }       
+
+    async with httpx.AsyncClient(timeout=60) as client:
+        resp = await client.get(url, headers=headers)
+
+    if resp.status_code != 200:
+        raise RunpodError(f"Runpod API error: {resp.status_code} - {resp.text}")
+    return resp.json()
