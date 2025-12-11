@@ -347,7 +347,7 @@ async def _anon_cleanup_loop():
                 pass
         await asyncio.sleep(ANON_CLEANUP_INTERVAL)
 
-from backend.services.runpod_client import submit_audio_job
+from backend.services.runpod_client import submit_audio_job, RunpodError
 
 test_router = APIRouter(prefix="/runpod", tags=["runpod"])
 
@@ -363,7 +363,15 @@ async def runpod_test(file: UploadFile = File(...)):
             model_name="openai/whisper-large-v2",
             language=None
             )
-    finally:
+    except RunpodError as e:
+        _safe_remove(input_path)
+        # покажем ошибку RunPod наружу
+        raise HTTPException(status_code=502, detail=str(e))
+    except Exception as e:
+        _safe_remove(input_path)
+        # любая другая ошибка — тоже наружу, пока дебажим
+        raise HTTPException(status_code=500, detail=f"Unexpected: {e}")
+    else:
         _safe_remove(input_path)
 
     return {"job_id": job_id}
