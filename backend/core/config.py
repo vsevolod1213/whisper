@@ -18,6 +18,9 @@ class Settings:
         self.access_token_expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
         self.refresh_token_expire_days = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
 
+        self.runpod_api = os.getenv("RUNPOD_API")
+        self.runpod_id = os.getenv("RUNPOD_ID")
+
     @property
     def database_url(self) -> str:
         return (

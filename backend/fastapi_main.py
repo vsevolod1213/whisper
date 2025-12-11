@@ -1,5 +1,5 @@
 # backend/fastapi_main.py
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, APIRouter
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -347,6 +347,27 @@ async def _anon_cleanup_loop():
                 pass
         await asyncio.sleep(ANON_CLEANUP_INTERVAL)
 
+from backend.services.runpod_client import submit_audio_job
+
+test_router = APIRouter(prefix="/runpod", tags=["runpod"])
+
+@test_router.post("/test")
+async def runpod_test(file: UploadFile = File(...)):
+    tusk_id = 999
+    temp_id = uuid.uuid4().hex
+    input_path = await _save_upload_to_temp(file, temp_id)
+    try:
+        job_id = await submit_audio_job(
+            audio_path=input_path,
+            task_id=tusk_id,
+            model_name="openai/whisper-large-v2",
+            language=None
+            )
+    finally:
+        _safe_remove(input_path)
+
+    return {"job_id": job_id}
+
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind = engine)
@@ -354,6 +375,7 @@ app.include_router(health_db)
 app.include_router(auth_anonymous_router)
 app.include_router(auth_users_router)
 app.include_router(transcriptions_router)
+app.include_router(test_router)
 
 @app.on_event("startup")
 async def startup_cleanup_task():
