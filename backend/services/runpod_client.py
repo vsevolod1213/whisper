@@ -27,6 +27,8 @@ s3_client = boto3.client(
     aws_access_key_id=settings.s3_access_id,
     aws_secret_access_key=settings.s3_access_secret,
     endpoint_url=settings.s3_endpoint_url,
+    region_name="eu-ro-1"
+
 )
 
 class RunpodError(Exception):
