@@ -106,23 +106,33 @@ class TranscribeHandler(MessageHandler):
         bio = BytesIO()
         file_size_mb = (file_obj.file_size or 0)/1024/1024
 
-        if file_size_mb <= max_memory:
-            file_id = getattr(file_obj, "file_id", None)
-            if not file_id:
-                await status_msg.edit_text("Не удалось получить идентификатор файла. Попробуйте еще раз.")
-                return
-            await bot.download(file_obj, destination=bio)
-            bio.seek(0)
-            source = bio
-        else:
-            original_name = getattr(file_obj, "file_name", None)
-            ext = Path(original_name).suffix if original_name else ".bin"
-            temp_path = files_dir / f"{file_obj.file_unique_id}{ext}"
-            await bot.download(file_obj, destination=temp_path)
-            source = temp_path
-        
-        stop_event = asyncio.Event()
-        editing_task = asyncio.create_task(self.keep_aditing(status_msg, stop_event))
+        try:
+            if file_size_mb <= max_memory:
+                file_id = getattr(file_obj, "file_id", None)
+                if not file_id:
+                    await status_msg.edit_text("Не удалось получить идентификатор файла. Попробуйте еще раз.")
+                    return
+                await bot.download(file_obj, destination=bio)
+                bio.seek(0)
+                source = bio
+            else:
+                original_name = getattr(file_obj, "file_name", None)
+                ext = Path(original_name).suffix if original_name else ".bin"
+                temp_path = files_dir / f"{file_obj.file_unique_id}{ext}"
+                await bot.download(file_obj, destination=temp_path)
+                source = temp_path
+            
+            stop_event = asyncio.Event()
+
+        except:
+            await status_msg.edit_text("Ошибка. Файл слишком длинный.")
+            return
+        try:
+            editing_task = asyncio.create_task(self.keep_aditing(status_msg, stop_event))
+        except:
+            editing_task = None
+            await status_msg.edit_text("Ошибка при обработке файла. Попробуйте еще раз.")
+            return
 
         try:
             text, cleanup = await asyncio.to_thread(which_file, source, media_type=message.content_type)
@@ -149,6 +159,7 @@ class TranscribeHandler(MessageHandler):
                         os.remove(f)
                 except:
                     pass
+            await message.answer("Готово!")
         except Exception as e:
             stop_event.set()
             editing_task.cancel()
