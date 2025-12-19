@@ -125,7 +125,7 @@ class TranscribeHandler(MessageHandler):
             stop_event = asyncio.Event()
 
         except:
-            await status_msg.edit_text("Ошибка. Файл слишком длинный.")
+            await status_msg.edit_text("Ошибка. Файл слишком большой.")
             return
         try:
             editing_task = asyncio.create_task(self.keep_aditing(status_msg, stop_event))
